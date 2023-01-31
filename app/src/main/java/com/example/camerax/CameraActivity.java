@@ -67,7 +67,7 @@ public class CameraActivity extends AppCompatActivity {
         Preview preview = new Preview.Builder().build();
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
-        preview.setSurfaceProvider(previewView.createSurfaceProvider());
+        preview.setSurfaceProvider(previewView.getSurfaceProvider());
         cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector,
                 imageAnalysis, preview);
     }
