@@ -1,61 +1,56 @@
 package com.example.camerax;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.app.Activity;
+import android.Manifest;
 import android.content.Intent;
-import android.net.Uri;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
+    private static final int CAMERA_REQUEST_CODE = 10;
 
-    public ActivityResultLauncher<Intent> someActivityResultLauncher;
-    public static int RC_PHOTO_PICKER = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        someActivityResultLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>() {
-                    @Override
-                    public void onActivityResult(ActivityResult result) {
-                        if (result.getResultCode() == Activity.RESULT_OK) {
-                            // There are no request codes
-                            Intent data = result.getData();
-                            Uri uri = data.getData();
-                            ImageView imageView = findViewById(R.id.img);
-                            imageView.setImageURI(uri);
-                        }
-                    }
-                });
-
-        Button button = findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
+        Button enableCamera = findViewById(R.id.enableCamera);
+        enableCamera.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                openSomeActivityForResult(view);
+            public void onClick(View v) {
+                if (hasCameraPermission()) {
+                    enableCamera();
+                } else {
+                    requestPermission();
+                }
             }
         });
     }
 
-    public void openSomeActivityForResult(View view) {
+    private boolean hasCameraPermission() {
+        return ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED;
+    }
 
-        //Create Intent
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/jpg");
-        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-        //Launch activity to get result
-        someActivityResultLauncher.launch(intent);
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(
+                this,
+                CAMERA_PERMISSION,
+                CAMERA_REQUEST_CODE
+        );
+    }
+
+    private void enableCamera() {
+        Intent intent = new Intent(this, CameraActivity.class);
+        startActivity(intent);
     }
 
 }
